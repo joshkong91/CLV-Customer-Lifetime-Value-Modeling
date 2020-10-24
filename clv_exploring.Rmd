@@ -1,0 +1,277 @@
+---
+title: "CLV Exploratory"
+author: "Josh Kong"
+date: "10/13/2020"
+output: pdf_document
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r}
+library(tidyverse)
+library(lubridate)
+retail <- read_csv("retail_cleaned.csv")
+theme_light()
+```
+
+## Using skimr to get a gist for how the dataset looks
+
+```{r}
+skimr::skim(retail)
+```
+
+The only data that we appear to be missing is CustomerID. This is probably due to the customer only making a one time purchase without making an account. I plan to filter these customers out later when I predict the customer's future CLV values.
+
+```{r}
+range(retail$InvoiceDate)
+#the data only accounts for a month and half of data.
+```
+
+
+```{r}
+#looking at revenue by the dates
+revenue_by_month <- retail %>% 
+  group_by(month = floor_date(InvoiceDate, "month")) %>% 
+  summarise(revenue = sum(sales)) %>% 
+  ungroup()
+
+ revenue_by_month %>% 
+  ggplot(aes(month, revenue)) + 
+  geom_point()+
+  geom_line() +
+   labs(x = "", y = "Revenue", title = "Revenue by Month")
+
+#there is a very large spike in revenue during November. This is probably due to Black Friday sales, or early Christmas shopping.
+#december 2011 has low numbers in sales. this is most likely due to the data not being complete
+```
+
+
+```{r}
+#looking at the monthly growth rate
+monthly_growth <- rep(NA, nrow(revenue_by_month))
+monthly_growth[1] <- 0
+for(i in 2:nrow(revenue_by_month-1))
+{
+  monthly_growth[i] <- (revenue_by_month$revenue[i] - revenue_by_month$revenue[i-1])/revenue_by_month$revenue[i-1]
+}
+revenue_by_month$monthly_growth <- monthly_growth
+revenue_by_month %>% 
+  filter(month != "2011-12-01") %>% 
+  ggplot(aes(month, monthly_growth)) + 
+  geom_point() + 
+  geom_line()+
+  geom_hline(yintercept = 0, lty = 2) + 
+  labs(title = "Monthly Growth", y = "") + 
+  scale_y_continuous(labels = scales::percent_format())
+#I'm excluding 2011 December from this graph because the data is still incomplete.
+```
+
+```{r}
+#looking at monthly active customers
+retail %>% 
+  filter(!is.na(CustomerID)) %>% 
+  group_by(month = floor_date(InvoiceDate, "month"), CustomerID) %>% 
+  summarise(count = n()) %>% 
+  ungroup() %>% 
+  count(month) %>% 
+  filter(month != "2011-12-01") %>% 
+  ggplot(aes(month, n)) + 
+  geom_point() + 
+  geom_line()+ 
+  labs(y = "Number of Active Users", x = "", title = "Number of Active Users per Month")
+
+#looks like there is consistent growth in the number of active users per month
+```
+
+```{r}
+#taking a look a new customers per month
+retail %>% 
+  distinct(CustomerID, InvoiceDate) %>% 
+  group_by(CustomerID) %>% 
+  summarise(first_purchase_date = min(InvoiceDate)) %>% 
+  ungroup() %>% 
+  count(first_purchase_date) %>% 
+  group_by(month = floor_date(first_purchase_date, "month")) %>% 
+  summarise(new_customers = sum(n)) %>% 
+  filter(month != "2011-12-01", month != "2010-12-01") %>%  #filtering out december because data is still incomplete
+  ggplot(aes(month, new_customers)) + 
+  geom_point() + 
+  geom_line()
+#we didn't have many new customers from June through August. Starting September there was a spike in new customers once again
+```
+
+## RFM (recency, frequency, monetary value) Clustering
+```{r}
+library(cluster)
+library(factoextra)
+```
+
+Calculating recency. Recency score is equal to the most recent purchase subtracted by the customer's most recent purchase.
+
+```{r}
+#going to calculate recency by subtracting the customer's most recent transcation by the max of the invoice date
+maxdate <- max(retail$InvoiceDate)
+
+recency_scores <- retail %>% 
+  filter(!is.na(CustomerID)) %>% 
+  group_by(CustomerID) %>% 
+  summarise(recency = maxdate - max(InvoiceDate)) 
+
+#distribution of recency scores
+recency_scores %>% 
+  ggplot(aes(recency)) + 
+  geom_histogram()
+```
+
+Choosing the number of clusters for recency and then using kmeans clustering
+```{r}
+#elbow method to see optimal number of clusters
+fviz_nbclust(as.matrix(recency_scores$recency), kmeans, method = "wss")
+
+#looking at the elbow plot, it seems it would be optimal to do 4 clusters
+
+recency_cluster <- kmeans(recency_scores$recency, 4)
+recency_center <- sort(desc(recency_cluster$centers)) * -1
+recency_cluster <- kmeans(recency_scores$recency, centers = recency_center) 
+#doing it twice to order the clusters by the cluster means
+recency_scores$r_clus <- recency_cluster$cluster
+
+#the higher the score, the more recently they've purchased an item
+```
+
+Calculating Frequency. Total number of order by a certain customer.
+
+```{r}
+#We'll be counting each invoice number as one order.
+frequency_scores <- retail %>% 
+  filter(!is.na(CustomerID)) %>% 
+  count(CustomerID, InvoiceNo) %>% 
+  count(CustomerID, sort = TRUE)
+
+#distribution of the frequency scores
+retail %>% 
+  filter(!is.na(CustomerID)) %>% 
+  count(CustomerID, InvoiceNo) %>% 
+  count(CustomerID, sort = TRUE) %>% 
+  ggplot(aes(n)) + 
+  geom_histogram(binwidth = 15)
+```
+
+Choosing the optimal number of clusters for frequency and doing k means clustering.
+
+```{r}
+fviz_nbclust(as.matrix(frequency_scores$n), kmeans, method = "wss")
+
+#looking at the elbow plot, it seems it would be optimal to do 5 clusters. However, to be consistent with recency, I will do 4 clusters once again.
+
+frequency_cluster <- kmeans(frequency_scores$n, 4)
+frequency_center <- sort(frequency_cluster$centers)
+frequency_cluster <- kmeans(frequency_scores$n, centers = frequency_center) 
+#doing it twice to order the clusters by the cluster means
+frequency_scores$f_clus<- frequency_cluster$cluster
+```
+
+
+Calculating monetary value
+```{r}
+#we are going to be calculating the total revenue each customer brought in
+money_scores <- retail %>% 
+  filter(!is.na(CustomerID)) %>% 
+  group_by(CustomerID) %>% 
+  summarise(total_revenue = sum(sales))
+
+#looking at the distribution of monetary value
+money_scores %>% 
+  ggplot(aes(total_revenue)) + 
+  geom_histogram()
+```
+
+Choosing optimal number of clusters for monetary value and doing k means clustering
+```{r}
+fviz_nbclust(as.matrix(money_scores$total_revenue), kmeans, method = "wss")
+
+#looking at the elbow plot, it seems it would be optimal to do 4 clusters. 
+
+money_cluster <- kmeans(money_scores$total_revenue, 4)
+money_center <- sort(money_cluster$centers)
+money_cluster <- kmeans(money_scores$total_revenue, centers = money_center) 
+#doing it twice to order the clusters by the cluster means
+money_scores$m_clus <- money_cluster$cluster
+```
+
+Combining all the scores together
+```{r}
+frequency_scores <- frequency_scores %>% 
+  arrange(CustomerID)
+
+rfm_scores <- as_tibble(data.frame(recency_scores, frequency_scores[-1], money_scores[-1]))
+colnames(rfm_scores) <- c("CustomerID","recency","r_clus","frequency","f_clus","money_value","m_clus")
+rfm_scores <- rfm_scores %>% 
+  group_by(CustomerID) %>% 
+  mutate(score = sum(r_clus,f_clus,m_clus)) %>% 
+  ungroup()
+
+
+#looking at the distribution of scores. Nobody got a perfect score of 12
+rfm_scores %>% 
+  count(score) %>% 
+  ggplot(aes(as.factor(score), n)) + 
+  geom_col() +
+  labs(title= "Distribution of Scores", x = "Score", y= "")
+```
+
+The scores range from 3-12. 
+
+I will value 3-4 as low value customers.
+5-7 as mid value customers.
+8-11 as high value customers.
+
+```{r}
+for(i in 1:nrow(rfm_scores))
+{
+  if(rfm_scores$score[i] <= 4)
+  {
+    rfm_scores$value[i] = "low"
+  }
+  else if(rfm_scores$score[i] > 4 && rfm_scores$score[i] <8)
+  {
+    rfm_scores$value[i] = "mid"
+  }
+  else
+  {
+    rfm_scores$value[i] = "high"
+  }
+}
+rfm_scores$value <- as.factor(rfm_scores$value)
+```
+
+Taking a look at how our valued customers are distributed in a scatterplot.
+```{r}
+rfm_scores %>% 
+  ggplot(aes(recency, frequency, color = value)) +
+  geom_point()
+
+rfm_scores %>% 
+  ggplot(aes(recency, money_value, color = value))+
+  geom_point()
+
+rfm_scores %>% 
+  ggplot(aes(frequency,money_value, color = value)) + 
+  geom_point()
+```
+
+
+Saving the scores dataset
+```{r}
+write.csv(rfm_scores, "rfm_scores.csv")
+```
+
+
+
+
+
+
+
+
+
+

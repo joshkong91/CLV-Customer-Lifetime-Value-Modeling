@@ -1,0 +1,1275 @@
+\PassOptionsToPackage{unicode=true}{hyperref} % options for packages loaded elsewhere
+\PassOptionsToPackage{hyphens}{url}
+%
+\documentclass[]{article}
+\usepackage{lmodern}
+\usepackage{amssymb,amsmath}
+\usepackage{ifxetex,ifluatex}
+\usepackage{fixltx2e} % provides \textsubscript
+\ifnum 0\ifxetex 1\fi\ifluatex 1\fi=0 % if pdftex
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+  \usepackage{textcomp} % provides euro and other symbols
+\else % if luatex or xelatex
+  \usepackage{unicode-math}
+  \defaultfontfeatures{Ligatures=TeX,Scale=MatchLowercase}
+\fi
+% use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+% use microtype if available
+\IfFileExists{microtype.sty}{%
+\usepackage[]{microtype}
+\UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+}{}
+\IfFileExists{parskip.sty}{%
+\usepackage{parskip}
+}{% else
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{6pt plus 2pt minus 1pt}
+}
+\usepackage{hyperref}
+\hypersetup{
+            pdftitle={CLV Exploratory},
+            pdfauthor={Josh Kong},
+            pdfborder={0 0 0},
+            breaklinks=true}
+\urlstyle{same}  % don't use monospace font for urls
+\usepackage[margin=1in]{geometry}
+\usepackage{color}
+\usepackage{fancyvrb}
+\newcommand{\VerbBar}{|}
+\newcommand{\VERB}{\Verb[commandchars=\\\{\}]}
+\DefineVerbatimEnvironment{Highlighting}{Verbatim}{commandchars=\\\{\}}
+% Add ',fontsize=\small' for more characters per line
+\usepackage{framed}
+\definecolor{shadecolor}{RGB}{248,248,248}
+\newenvironment{Shaded}{\begin{snugshade}}{\end{snugshade}}
+\newcommand{\AlertTok}[1]{\textcolor[rgb]{0.94,0.16,0.16}{#1}}
+\newcommand{\AnnotationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\AttributeTok}[1]{\textcolor[rgb]{0.77,0.63,0.00}{#1}}
+\newcommand{\BaseNTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\BuiltInTok}[1]{#1}
+\newcommand{\CharTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\CommentTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{#1}}}
+\newcommand{\CommentVarTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\ConstantTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\ControlFlowTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\DataTypeTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{#1}}
+\newcommand{\DecValTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\DocumentationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\ErrorTok}[1]{\textcolor[rgb]{0.64,0.00,0.00}{\textbf{#1}}}
+\newcommand{\ExtensionTok}[1]{#1}
+\newcommand{\FloatTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\FunctionTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\ImportTok}[1]{#1}
+\newcommand{\InformationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\KeywordTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\NormalTok}[1]{#1}
+\newcommand{\OperatorTok}[1]{\textcolor[rgb]{0.81,0.36,0.00}{\textbf{#1}}}
+\newcommand{\OtherTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{#1}}
+\newcommand{\PreprocessorTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{#1}}}
+\newcommand{\RegionMarkerTok}[1]{#1}
+\newcommand{\SpecialCharTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\SpecialStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\StringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\VariableTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\VerbatimStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\WarningTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\usepackage{longtable,booktabs}
+% Fix footnotes in tables (requires footnote package)
+\IfFileExists{footnote.sty}{\usepackage{footnote}\makesavenoteenv{longtable}}{}
+\usepackage{graphicx,grffile}
+\makeatletter
+\def\maxwidth{\ifdim\Gin@nat@width>\linewidth\linewidth\else\Gin@nat@width\fi}
+\def\maxheight{\ifdim\Gin@nat@height>\textheight\textheight\else\Gin@nat@height\fi}
+\makeatother
+% Scale images if necessary, so that they will not overflow the page
+% margins by default, and it is still possible to overwrite the defaults
+% using explicit options in \includegraphics[width, height, ...]{}
+\setkeys{Gin}{width=\maxwidth,height=\maxheight,keepaspectratio}
+\setlength{\emergencystretch}{3em}  % prevent overfull lines
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+\setcounter{secnumdepth}{0}
+% Redefines (sub)paragraphs to behave more like sections
+\ifx\paragraph\undefined\else
+\let\oldparagraph\paragraph
+\renewcommand{\paragraph}[1]{\oldparagraph{#1}\mbox{}}
+\fi
+\ifx\subparagraph\undefined\else
+\let\oldsubparagraph\subparagraph
+\renewcommand{\subparagraph}[1]{\oldsubparagraph{#1}\mbox{}}
+\fi
+
+% set default figure placement to htbp
+\makeatletter
+\def\fps@figure{htbp}
+\makeatother
+
+
+\title{CLV Exploratory}
+\author{Josh Kong}
+\date{10/13/2020}
+
+\begin{document}
+\maketitle
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{library}\NormalTok{(tidyverse)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## -- Attaching packages ----------------------------------------------------------------------------- tidyverse 1.3.0 --
+\end{verbatim}
+
+\begin{verbatim}
+## v ggplot2 3.3.2     v purrr   0.3.4
+## v tibble  3.0.3     v dplyr   1.0.2
+## v tidyr   1.1.2     v stringr 1.4.0
+## v readr   1.3.1     v forcats 0.5.0
+\end{verbatim}
+
+\begin{verbatim}
+## -- Conflicts -------------------------------------------------------------------------------- tidyverse_conflicts() --
+## x dplyr::filter() masks stats::filter()
+## x dplyr::lag()    masks stats::lag()
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{library}\NormalTok{(lubridate)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## 
+## Attaching package: 'lubridate'
+\end{verbatim}
+
+\begin{verbatim}
+## The following objects are masked from 'package:base':
+## 
+##     date, intersect, setdiff, union
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{retail <-}\StringTok{ }\KeywordTok{read_csv}\NormalTok{(}\StringTok{"retail_cleaned.csv"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Warning: Missing column names filled in: 'X1' [1]
+\end{verbatim}
+
+\begin{verbatim}
+## Parsed with column specification:
+## cols(
+##   X1 = col_double(),
+##   InvoiceNo = col_character(),
+##   StockCode = col_character(),
+##   Quantity = col_double(),
+##   InvoiceDate = col_date(format = ""),
+##   UnitPrice = col_double(),
+##   CustomerID = col_double(),
+##   Country = col_character(),
+##   Description = col_character(),
+##   sales = col_double()
+## )
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{theme_light}\NormalTok{()}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## List of 93
+##  $ line                      :List of 6
+##   ..$ colour       : chr "black"
+##   ..$ size         : num 0.5
+##   ..$ linetype     : num 1
+##   ..$ lineend      : chr "butt"
+##   ..$ arrow        : logi FALSE
+##   ..$ inherit.blank: logi TRUE
+##   ..- attr(*, "class")= chr [1:2] "element_line" "element"
+##  $ rect                      :List of 5
+##   ..$ fill         : chr "white"
+##   ..$ colour       : chr "black"
+##   ..$ size         : num 0.5
+##   ..$ linetype     : num 1
+##   ..$ inherit.blank: logi TRUE
+##   ..- attr(*, "class")= chr [1:2] "element_rect" "element"
+##  $ text                      :List of 11
+##   ..$ family       : chr ""
+##   ..$ face         : chr "plain"
+##   ..$ colour       : chr "black"
+##   ..$ size         : num 11
+##   ..$ hjust        : num 0.5
+##   ..$ vjust        : num 0.5
+##   ..$ angle        : num 0
+##   ..$ lineheight   : num 0.9
+##   ..$ margin       : 'margin' num [1:4] 0pt 0pt 0pt 0pt
+##   .. ..- attr(*, "valid.unit")= int 8
+##   .. ..- attr(*, "unit")= chr "pt"
+##   ..$ debug        : logi FALSE
+##   ..$ inherit.blank: logi TRUE
+##   ..- attr(*, "class")= chr [1:2] "element_text" "element"
+##  $ title                     : NULL
+##  $ aspect.ratio              : NULL
+##  $ axis.title                : NULL
+##  $ axis.title.x              :List of 11
+##   ..$ family       : NULL
+##   ..$ face         : NULL
+##   ..$ colour       : NULL
+##   ..$ size         : NULL
+##   ..$ hjust        : NULL
+##   ..$ vjust        : num 1
+##   ..$ angle        : NULL
+##   ..$ lineheight   : NULL
+##   ..$ margin       : 'margin' num [1:4] 2.75pt 0pt 0pt 0pt
+##   .. ..- attr(*, "valid.unit")= int 8
+##   .. ..- attr(*, "unit")= chr "pt"
+##   ..$ debug        : NULL
+##   ..$ inherit.blank: logi TRUE
+##   ..- attr(*, "class")= chr [1:2] "element_text" "element"
+##  $ axis.title.x.top          :List of 11
+##   ..$ family       : NULL
+##   ..$ face         : NULL
+##   ..$ colour       : NULL
+##   ..$ size         : NULL
+##   ..$ hjust        : NULL
+##   ..$ vjust        : num 0
+##   ..$ angle        : NULL
+##   ..$ lineheight   : NULL
+##   ..$ margin       : 'margin' num [1:4] 0pt 0pt 2.75pt 0pt
+##   .. ..- attr(*, "valid.unit")= int 8
+##   .. ..- attr(*, "unit")= chr "pt"
+##   ..$ debug        : NULL
+##   ..$ inherit.blank: logi TRUE
+##   ..- attr(*, "class")= chr [1:2] "element_text" "element"
+##  $ axis.title.x.bottom       : NULL
+##  $ axis.title.y              :List of 11
+##   ..$ family       : NULL
+##   ..$ face         : NULL
+##   ..$ colour       : NULL
+##   ..$ size         : NULL
+##   ..$ hjust        : NULL
+##   ..$ vjust        : num 1
+##   ..$ angle        : num 90
+##   ..$ lineheight   : NULL
+##   ..$ margin       : 'margin' num [1:4] 0pt 2.75pt 0pt 0pt
+##   .. ..- attr(*, "valid.unit")= int 8
+##   .. ..- attr(*, "unit")= chr "pt"
+##   ..$ debug        : NULL
+##   ..$ inherit.blank: logi TRUE
+##   ..- attr(*, "class")= chr [1:2] "element_text" "element"
+##  $ axis.title.y.left         : NULL
+##  $ axis.title.y.right        :List of 11
+##   ..$ family       : NULL
+##   ..$ face         : NULL
+##   ..$ colour       : NULL
+##   ..$ size         : NULL
+##   ..$ hjust        : NULL
+##   ..$ vjust        : num 0
+##   ..$ angle        : num -90
+##   ..$ lineheight   : NULL
+##   ..$ margin       : 'margin' num [1:4] 0pt 0pt 0pt 2.75pt
+##   .. ..- attr(*, "valid.unit")= int 8
+##   .. ..- attr(*, "unit")= chr "pt"
+##   ..$ debug        : NULL
+##   ..$ inherit.blank: logi TRUE
+##   ..- attr(*, "class")= chr [1:2] "element_text" "element"
+##  $ axis.text                 :List of 11
+##   ..$ family       : NULL
+##   ..$ face         : NULL
+##   ..$ colour       : chr "grey30"
+##   ..$ size         : 'rel' num 0.8
+##   ..$ hjust        : NULL
+##   ..$ vjust        : NULL
+##   ..$ angle        : NULL
+##   ..$ lineheight   : NULL
+##   ..$ margin       : NULL
+##   ..$ debug        : NULL
+##   ..$ inherit.blank: logi TRUE
+##   ..- attr(*, "class")= chr [1:2] "element_text" "element"
+##  $ axis.text.x               :List of 11
+##   ..$ family       : NULL
+##   ..$ face         : NULL
+##   ..$ colour       : NULL
+##   ..$ size         : NULL
+##   ..$ hjust        : NULL
+##   ..$ vjust        : num 1
+##   ..$ angle        : NULL
+##   ..$ lineheight   : NULL
+##   ..$ margin       : 'margin' num [1:4] 2.2pt 0pt 0pt 0pt
+##   .. ..- attr(*, "valid.unit")= int 8
+##   .. ..- attr(*, "unit")= chr "pt"
+##   ..$ debug        : NULL
+##   ..$ inherit.blank: logi TRUE
+##   ..- attr(*, "class")= chr [1:2] "element_text" "element"
+##  $ axis.text.x.top           :List of 11
+##   ..$ family       : NULL
+##   ..$ face         : NULL
+##   ..$ colour       : NULL
+##   ..$ size         : NULL
+##   ..$ hjust        : NULL
+##   ..$ vjust        : num 0
+##   ..$ angle        : NULL
+##   ..$ lineheight   : NULL
+##   ..$ margin       : 'margin' num [1:4] 0pt 0pt 2.2pt 0pt
+##   .. ..- attr(*, "valid.unit")= int 8
+##   .. ..- attr(*, "unit")= chr "pt"
+##   ..$ debug        : NULL
+##   ..$ inherit.blank: logi TRUE
+##   ..- attr(*, "class")= chr [1:2] "element_text" "element"
+##  $ axis.text.x.bottom        : NULL
+##  $ axis.text.y               :List of 11
+##   ..$ family       : NULL
+##   ..$ face         : NULL
+##   ..$ colour       : NULL
+##   ..$ size         : NULL
+##   ..$ hjust        : num 1
+##   ..$ vjust        : NULL
+##   ..$ angle        : NULL
+##   ..$ lineheight   : NULL
+##   ..$ margin       : 'margin' num [1:4] 0pt 2.2pt 0pt 0pt
+##   .. ..- attr(*, "valid.unit")= int 8
+##   .. ..- attr(*, "unit")= chr "pt"
+##   ..$ debug        : NULL
+##   ..$ inherit.blank: logi TRUE
+##   ..- attr(*, "class")= chr [1:2] "element_text" "element"
+##  $ axis.text.y.left          : NULL
+##  $ axis.text.y.right         :List of 11
+##   ..$ family       : NULL
+##   ..$ face         : NULL
+##   ..$ colour       : NULL
+##   ..$ size         : NULL
+##   ..$ hjust        : num 0
+##   ..$ vjust        : NULL
+##   ..$ angle        : NULL
+##   ..$ lineheight   : NULL
+##   ..$ margin       : 'margin' num [1:4] 0pt 0pt 0pt 2.2pt
+##   .. ..- attr(*, "valid.unit")= int 8
+##   .. ..- attr(*, "unit")= chr "pt"
+##   ..$ debug        : NULL
+##   ..$ inherit.blank: logi TRUE
+##   ..- attr(*, "class")= chr [1:2] "element_text" "element"
+##  $ axis.ticks                :List of 6
+##   ..$ colour       : chr "grey70"
+##   ..$ size         : 'rel' num 0.5
+##   ..$ linetype     : NULL
+##   ..$ lineend      : NULL
+##   ..$ arrow        : logi FALSE
+##   ..$ inherit.blank: logi TRUE
+##   ..- attr(*, "class")= chr [1:2] "element_line" "element"
+##  $ axis.ticks.x              : NULL
+##  $ axis.ticks.x.top          : NULL
+##  $ axis.ticks.x.bottom       : NULL
+##  $ axis.ticks.y              : NULL
+##  $ axis.ticks.y.left         : NULL
+##  $ axis.ticks.y.right        : NULL
+##  $ axis.ticks.length         : 'unit' num 2.75pt
+##   ..- attr(*, "valid.unit")= int 8
+##   ..- attr(*, "unit")= chr "pt"
+##  $ axis.ticks.length.x       : NULL
+##  $ axis.ticks.length.x.top   : NULL
+##  $ axis.ticks.length.x.bottom: NULL
+##  $ axis.ticks.length.y       : NULL
+##  $ axis.ticks.length.y.left  : NULL
+##  $ axis.ticks.length.y.right : NULL
+##  $ axis.line                 : list()
+##   ..- attr(*, "class")= chr [1:2] "element_blank" "element"
+##  $ axis.line.x               : NULL
+##  $ axis.line.x.top           : NULL
+##  $ axis.line.x.bottom        : NULL
+##  $ axis.line.y               : NULL
+##  $ axis.line.y.left          : NULL
+##  $ axis.line.y.right         : NULL
+##  $ legend.background         :List of 5
+##   ..$ fill         : NULL
+##   ..$ colour       : logi NA
+##   ..$ size         : NULL
+##   ..$ linetype     : NULL
+##   ..$ inherit.blank: logi TRUE
+##   ..- attr(*, "class")= chr [1:2] "element_rect" "element"
+##  $ legend.margin             : 'margin' num [1:4] 5.5pt 5.5pt 5.5pt 5.5pt
+##   ..- attr(*, "valid.unit")= int 8
+##   ..- attr(*, "unit")= chr "pt"
+##  $ legend.spacing            : 'unit' num 11pt
+##   ..- attr(*, "valid.unit")= int 8
+##   ..- attr(*, "unit")= chr "pt"
+##  $ legend.spacing.x          : NULL
+##  $ legend.spacing.y          : NULL
+##  $ legend.key                :List of 5
+##   ..$ fill         : chr "white"
+##   ..$ colour       : logi NA
+##   ..$ size         : NULL
+##   ..$ linetype     : NULL
+##   ..$ inherit.blank: logi TRUE
+##   ..- attr(*, "class")= chr [1:2] "element_rect" "element"
+##  $ legend.key.size           : 'unit' num 1.2lines
+##   ..- attr(*, "valid.unit")= int 3
+##   ..- attr(*, "unit")= chr "lines"
+##  $ legend.key.height         : NULL
+##  $ legend.key.width          : NULL
+##  $ legend.text               :List of 11
+##   ..$ family       : NULL
+##   ..$ face         : NULL
+##   ..$ colour       : NULL
+##   ..$ size         : 'rel' num 0.8
+##   ..$ hjust        : NULL
+##   ..$ vjust        : NULL
+##   ..$ angle        : NULL
+##   ..$ lineheight   : NULL
+##   ..$ margin       : NULL
+##   ..$ debug        : NULL
+##   ..$ inherit.blank: logi TRUE
+##   ..- attr(*, "class")= chr [1:2] "element_text" "element"
+##  $ legend.text.align         : NULL
+##  $ legend.title              :List of 11
+##   ..$ family       : NULL
+##   ..$ face         : NULL
+##   ..$ colour       : NULL
+##   ..$ size         : NULL
+##   ..$ hjust        : num 0
+##   ..$ vjust        : NULL
+##   ..$ angle        : NULL
+##   ..$ lineheight   : NULL
+##   ..$ margin       : NULL
+##   ..$ debug        : NULL
+##   ..$ inherit.blank: logi TRUE
+##   ..- attr(*, "class")= chr [1:2] "element_text" "element"
+##  $ legend.title.align        : NULL
+##  $ legend.position           : chr "right"
+##  $ legend.direction          : NULL
+##  $ legend.justification      : chr "center"
+##  $ legend.box                : NULL
+##  $ legend.box.just           : NULL
+##  $ legend.box.margin         : 'margin' num [1:4] 0cm 0cm 0cm 0cm
+##   ..- attr(*, "valid.unit")= int 1
+##   ..- attr(*, "unit")= chr "cm"
+##  $ legend.box.background     : list()
+##   ..- attr(*, "class")= chr [1:2] "element_blank" "element"
+##  $ legend.box.spacing        : 'unit' num 11pt
+##   ..- attr(*, "valid.unit")= int 8
+##   ..- attr(*, "unit")= chr "pt"
+##  $ panel.background          :List of 5
+##   ..$ fill         : chr "white"
+##   ..$ colour       : logi NA
+##   ..$ size         : NULL
+##   ..$ linetype     : NULL
+##   ..$ inherit.blank: logi TRUE
+##   ..- attr(*, "class")= chr [1:2] "element_rect" "element"
+##  $ panel.border              :List of 5
+##   ..$ fill         : logi NA
+##   ..$ colour       : chr "grey70"
+##   ..$ size         : 'rel' num 1
+##   ..$ linetype     : NULL
+##   ..$ inherit.blank: logi TRUE
+##   ..- attr(*, "class")= chr [1:2] "element_rect" "element"
+##  $ panel.spacing             : 'unit' num 5.5pt
+##   ..- attr(*, "valid.unit")= int 8
+##   ..- attr(*, "unit")= chr "pt"
+##  $ panel.spacing.x           : NULL
+##  $ panel.spacing.y           : NULL
+##  $ panel.grid                :List of 6
+##   ..$ colour       : chr "grey87"
+##   ..$ size         : NULL
+##   ..$ linetype     : NULL
+##   ..$ lineend      : NULL
+##   ..$ arrow        : logi FALSE
+##   ..$ inherit.blank: logi TRUE
+##   ..- attr(*, "class")= chr [1:2] "element_line" "element"
+##  $ panel.grid.major          :List of 6
+##   ..$ colour       : NULL
+##   ..$ size         : 'rel' num 0.5
+##   ..$ linetype     : NULL
+##   ..$ lineend      : NULL
+##   ..$ arrow        : logi FALSE
+##   ..$ inherit.blank: logi TRUE
+##   ..- attr(*, "class")= chr [1:2] "element_line" "element"
+##  $ panel.grid.minor          :List of 6
+##   ..$ colour       : NULL
+##   ..$ size         : 'rel' num 0.25
+##   ..$ linetype     : NULL
+##   ..$ lineend      : NULL
+##   ..$ arrow        : logi FALSE
+##   ..$ inherit.blank: logi TRUE
+##   ..- attr(*, "class")= chr [1:2] "element_line" "element"
+##  $ panel.grid.major.x        : NULL
+##  $ panel.grid.major.y        : NULL
+##  $ panel.grid.minor.x        : NULL
+##  $ panel.grid.minor.y        : NULL
+##  $ panel.ontop               : logi FALSE
+##  $ plot.background           :List of 5
+##   ..$ fill         : NULL
+##   ..$ colour       : chr "white"
+##   ..$ size         : NULL
+##   ..$ linetype     : NULL
+##   ..$ inherit.blank: logi TRUE
+##   ..- attr(*, "class")= chr [1:2] "element_rect" "element"
+##  $ plot.title                :List of 11
+##   ..$ family       : NULL
+##   ..$ face         : NULL
+##   ..$ colour       : NULL
+##   ..$ size         : 'rel' num 1.2
+##   ..$ hjust        : num 0
+##   ..$ vjust        : num 1
+##   ..$ angle        : NULL
+##   ..$ lineheight   : NULL
+##   ..$ margin       : 'margin' num [1:4] 0pt 0pt 5.5pt 0pt
+##   .. ..- attr(*, "valid.unit")= int 8
+##   .. ..- attr(*, "unit")= chr "pt"
+##   ..$ debug        : NULL
+##   ..$ inherit.blank: logi TRUE
+##   ..- attr(*, "class")= chr [1:2] "element_text" "element"
+##  $ plot.title.position       : chr "panel"
+##  $ plot.subtitle             :List of 11
+##   ..$ family       : NULL
+##   ..$ face         : NULL
+##   ..$ colour       : NULL
+##   ..$ size         : NULL
+##   ..$ hjust        : num 0
+##   ..$ vjust        : num 1
+##   ..$ angle        : NULL
+##   ..$ lineheight   : NULL
+##   ..$ margin       : 'margin' num [1:4] 0pt 0pt 5.5pt 0pt
+##   .. ..- attr(*, "valid.unit")= int 8
+##   .. ..- attr(*, "unit")= chr "pt"
+##   ..$ debug        : NULL
+##   ..$ inherit.blank: logi TRUE
+##   ..- attr(*, "class")= chr [1:2] "element_text" "element"
+##  $ plot.caption              :List of 11
+##   ..$ family       : NULL
+##   ..$ face         : NULL
+##   ..$ colour       : NULL
+##   ..$ size         : 'rel' num 0.8
+##   ..$ hjust        : num 1
+##   ..$ vjust        : num 1
+##   ..$ angle        : NULL
+##   ..$ lineheight   : NULL
+##   ..$ margin       : 'margin' num [1:4] 5.5pt 0pt 0pt 0pt
+##   .. ..- attr(*, "valid.unit")= int 8
+##   .. ..- attr(*, "unit")= chr "pt"
+##   ..$ debug        : NULL
+##   ..$ inherit.blank: logi TRUE
+##   ..- attr(*, "class")= chr [1:2] "element_text" "element"
+##  $ plot.caption.position     : chr "panel"
+##  $ plot.tag                  :List of 11
+##   ..$ family       : NULL
+##   ..$ face         : NULL
+##   ..$ colour       : NULL
+##   ..$ size         : 'rel' num 1.2
+##   ..$ hjust        : num 0.5
+##   ..$ vjust        : num 0.5
+##   ..$ angle        : NULL
+##   ..$ lineheight   : NULL
+##   ..$ margin       : NULL
+##   ..$ debug        : NULL
+##   ..$ inherit.blank: logi TRUE
+##   ..- attr(*, "class")= chr [1:2] "element_text" "element"
+##  $ plot.tag.position         : chr "topleft"
+##  $ plot.margin               : 'margin' num [1:4] 5.5pt 5.5pt 5.5pt 5.5pt
+##   ..- attr(*, "valid.unit")= int 8
+##   ..- attr(*, "unit")= chr "pt"
+##  $ strip.background          :List of 5
+##   ..$ fill         : chr "grey70"
+##   ..$ colour       : logi NA
+##   ..$ size         : NULL
+##   ..$ linetype     : NULL
+##   ..$ inherit.blank: logi TRUE
+##   ..- attr(*, "class")= chr [1:2] "element_rect" "element"
+##  $ strip.background.x        : NULL
+##  $ strip.background.y        : NULL
+##  $ strip.placement           : chr "inside"
+##  $ strip.text                :List of 11
+##   ..$ family       : NULL
+##   ..$ face         : NULL
+##   ..$ colour       : chr "white"
+##   ..$ size         : 'rel' num 0.8
+##   ..$ hjust        : NULL
+##   ..$ vjust        : NULL
+##   ..$ angle        : NULL
+##   ..$ lineheight   : NULL
+##   ..$ margin       : 'margin' num [1:4] 4.4pt 4.4pt 4.4pt 4.4pt
+##   .. ..- attr(*, "valid.unit")= int 8
+##   .. ..- attr(*, "unit")= chr "pt"
+##   ..$ debug        : NULL
+##   ..$ inherit.blank: logi TRUE
+##   ..- attr(*, "class")= chr [1:2] "element_text" "element"
+##  $ strip.text.x              : NULL
+##  $ strip.text.y              :List of 11
+##   ..$ family       : NULL
+##   ..$ face         : NULL
+##   ..$ colour       : NULL
+##   ..$ size         : NULL
+##   ..$ hjust        : NULL
+##   ..$ vjust        : NULL
+##   ..$ angle        : num -90
+##   ..$ lineheight   : NULL
+##   ..$ margin       : NULL
+##   ..$ debug        : NULL
+##   ..$ inherit.blank: logi TRUE
+##   ..- attr(*, "class")= chr [1:2] "element_text" "element"
+##  $ strip.switch.pad.grid     : 'unit' num 2.75pt
+##   ..- attr(*, "valid.unit")= int 8
+##   ..- attr(*, "unit")= chr "pt"
+##  $ strip.switch.pad.wrap     : 'unit' num 2.75pt
+##   ..- attr(*, "valid.unit")= int 8
+##   ..- attr(*, "unit")= chr "pt"
+##  $ strip.text.y.left         :List of 11
+##   ..$ family       : NULL
+##   ..$ face         : NULL
+##   ..$ colour       : NULL
+##   ..$ size         : NULL
+##   ..$ hjust        : NULL
+##   ..$ vjust        : NULL
+##   ..$ angle        : num 90
+##   ..$ lineheight   : NULL
+##   ..$ margin       : NULL
+##   ..$ debug        : NULL
+##   ..$ inherit.blank: logi TRUE
+##   ..- attr(*, "class")= chr [1:2] "element_text" "element"
+##  - attr(*, "class")= chr [1:2] "theme" "gg"
+##  - attr(*, "complete")= logi TRUE
+##  - attr(*, "validate")= logi TRUE
+\end{verbatim}
+
+\hypertarget{using-skimr-to-get-a-gist-for-how-the-dataset-looks}{%
+\subsection{Using skimr to get a gist for how the dataset
+looks}\label{using-skimr-to-get-a-gist-for-how-the-dataset-looks}}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{skimr}\OperatorTok{::}\KeywordTok{skim}\NormalTok{(retail)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{longtable}[]{@{}ll@{}}
+\caption{Data summary}\tabularnewline
+\toprule
+\endhead
+Name & retail\tabularnewline
+Number of rows & 649107\tabularnewline
+Number of columns & 10\tabularnewline
+\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_ &\tabularnewline
+Column type frequency: &\tabularnewline
+character & 4\tabularnewline
+Date & 1\tabularnewline
+numeric & 5\tabularnewline
+\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_ &\tabularnewline
+Group variables & None\tabularnewline
+\bottomrule
+\end{longtable}
+
+\textbf{Variable type: character}
+
+\begin{longtable}[]{@{}lrrrrrrr@{}}
+\toprule
+skim\_variable & n\_missing & complete\_rate & min & max & empty &
+n\_unique & whitespace\tabularnewline
+\midrule
+\endhead
+InvoiceNo & 0 & 1 & 6 & 7 & 0 & 25787 & 0\tabularnewline
+StockCode & 0 & 1 & 1 & 12 & 0 & 3957 & 0\tabularnewline
+Country & 0 & 1 & 3 & 20 & 0 & 38 & 0\tabularnewline
+Description & 0 & 1 & 2 & 35 & 0 & 4172 & 0\tabularnewline
+\bottomrule
+\end{longtable}
+
+\textbf{Variable type: Date}
+
+\begin{longtable}[]{@{}lrrlllr@{}}
+\toprule
+skim\_variable & n\_missing & complete\_rate & min & max & median &
+n\_unique\tabularnewline
+\midrule
+\endhead
+InvoiceDate & 0 & 1 & 2010-12-01 & 2011-12-09 & 2011-07-22 &
+305\tabularnewline
+\bottomrule
+\end{longtable}
+
+\textbf{Variable type: numeric}
+
+\begin{longtable}[]{@{}lrrrrrrrrrl@{}}
+\toprule
+\begin{minipage}[b]{0.09\columnwidth}\raggedright
+skim\_variable\strut
+\end{minipage} & \begin{minipage}[b]{0.06\columnwidth}\raggedleft
+n\_missing\strut
+\end{minipage} & \begin{minipage}[b]{0.09\columnwidth}\raggedleft
+complete\_rate\strut
+\end{minipage} & \begin{minipage}[b]{0.06\columnwidth}\raggedleft
+mean\strut
+\end{minipage} & \begin{minipage}[b]{0.06\columnwidth}\raggedleft
+sd\strut
+\end{minipage} & \begin{minipage}[b]{0.07\columnwidth}\raggedleft
+p0\strut
+\end{minipage} & \begin{minipage}[b]{0.06\columnwidth}\raggedleft
+p25\strut
+\end{minipage} & \begin{minipage}[b]{0.06\columnwidth}\raggedleft
+p50\strut
+\end{minipage} & \begin{minipage}[b]{0.06\columnwidth}\raggedleft
+p75\strut
+\end{minipage} & \begin{minipage}[b]{0.06\columnwidth}\raggedleft
+p100\strut
+\end{minipage} & \begin{minipage}[b]{0.04\columnwidth}\raggedright
+hist\strut
+\end{minipage}\tabularnewline
+\midrule
+\endhead
+\begin{minipage}[t]{0.09\columnwidth}\raggedright
+X1\strut
+\end{minipage} & \begin{minipage}[t]{0.06\columnwidth}\raggedleft
+0\strut
+\end{minipage} & \begin{minipage}[t]{0.09\columnwidth}\raggedleft
+1.00\strut
+\end{minipage} & \begin{minipage}[t]{0.06\columnwidth}\raggedleft
+324554.00\strut
+\end{minipage} & \begin{minipage}[t]{0.06\columnwidth}\raggedleft
+187381.19\strut
+\end{minipage} & \begin{minipage}[t]{0.07\columnwidth}\raggedleft
+1.00\strut
+\end{minipage} & \begin{minipage}[t]{0.06\columnwidth}\raggedleft
+162277.50\strut
+\end{minipage} & \begin{minipage}[t]{0.06\columnwidth}\raggedleft
+324554.00\strut
+\end{minipage} & \begin{minipage}[t]{0.06\columnwidth}\raggedleft
+486830.50\strut
+\end{minipage} & \begin{minipage}[t]{0.06\columnwidth}\raggedleft
+649107.0\strut
+\end{minipage} & \begin{minipage}[t]{0.04\columnwidth}\raggedright
+▇▇▇▇▇\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.09\columnwidth}\raggedright
+Quantity\strut
+\end{minipage} & \begin{minipage}[t]{0.06\columnwidth}\raggedleft
+0\strut
+\end{minipage} & \begin{minipage}[t]{0.09\columnwidth}\raggedleft
+1.00\strut
+\end{minipage} & \begin{minipage}[t]{0.06\columnwidth}\raggedleft
+9.84\strut
+\end{minipage} & \begin{minipage}[t]{0.06\columnwidth}\raggedleft
+202.48\strut
+\end{minipage} & \begin{minipage}[t]{0.07\columnwidth}\raggedleft
+-80995.00\strut
+\end{minipage} & \begin{minipage}[t]{0.06\columnwidth}\raggedleft
+1.00\strut
+\end{minipage} & \begin{minipage}[t]{0.06\columnwidth}\raggedleft
+4.00\strut
+\end{minipage} & \begin{minipage}[t]{0.06\columnwidth}\raggedleft
+10.00\strut
+\end{minipage} & \begin{minipage}[t]{0.06\columnwidth}\raggedleft
+80995.0\strut
+\end{minipage} & \begin{minipage}[t]{0.04\columnwidth}\raggedright
+▁▁▇▁▁\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.09\columnwidth}\raggedright
+UnitPrice\strut
+\end{minipage} & \begin{minipage}[t]{0.06\columnwidth}\raggedleft
+0\strut
+\end{minipage} & \begin{minipage}[t]{0.09\columnwidth}\raggedleft
+1.00\strut
+\end{minipage} & \begin{minipage}[t]{0.06\columnwidth}\raggedleft
+4.40\strut
+\end{minipage} & \begin{minipage}[t]{0.06\columnwidth}\raggedleft
+88.44\strut
+\end{minipage} & \begin{minipage}[t]{0.07\columnwidth}\raggedleft
+-11062.06\strut
+\end{minipage} & \begin{minipage}[t]{0.06\columnwidth}\raggedleft
+1.25\strut
+\end{minipage} & \begin{minipage}[t]{0.06\columnwidth}\raggedleft
+2.10\strut
+\end{minipage} & \begin{minipage}[t]{0.06\columnwidth}\raggedleft
+4.13\strut
+\end{minipage} & \begin{minipage}[t]{0.06\columnwidth}\raggedleft
+38970.0\strut
+\end{minipage} & \begin{minipage}[t]{0.04\columnwidth}\raggedright
+▁▇▁▁▁\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.09\columnwidth}\raggedright
+CustomerID\strut
+\end{minipage} & \begin{minipage}[t]{0.06\columnwidth}\raggedleft
+156547\strut
+\end{minipage} & \begin{minipage}[t]{0.09\columnwidth}\raggedleft
+0.76\strut
+\end{minipage} & \begin{minipage}[t]{0.06\columnwidth}\raggedleft
+15288.18\strut
+\end{minipage} & \begin{minipage}[t]{0.06\columnwidth}\raggedleft
+1711.58\strut
+\end{minipage} & \begin{minipage}[t]{0.07\columnwidth}\raggedleft
+12346.00\strut
+\end{minipage} & \begin{minipage}[t]{0.06\columnwidth}\raggedleft
+13952.00\strut
+\end{minipage} & \begin{minipage}[t]{0.06\columnwidth}\raggedleft
+15152.00\strut
+\end{minipage} & \begin{minipage}[t]{0.06\columnwidth}\raggedleft
+16791.00\strut
+\end{minipage} & \begin{minipage}[t]{0.06\columnwidth}\raggedleft
+18287.0\strut
+\end{minipage} & \begin{minipage}[t]{0.04\columnwidth}\raggedright
+▇▇▇▇▇\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.09\columnwidth}\raggedright
+sales\strut
+\end{minipage} & \begin{minipage}[t]{0.06\columnwidth}\raggedleft
+0\strut
+\end{minipage} & \begin{minipage}[t]{0.09\columnwidth}\raggedleft
+1.00\strut
+\end{minipage} & \begin{minipage}[t]{0.06\columnwidth}\raggedleft
+19.21\strut
+\end{minipage} & \begin{minipage}[t]{0.06\columnwidth}\raggedleft
+352.03\strut
+\end{minipage} & \begin{minipage}[t]{0.07\columnwidth}\raggedleft
+-168469.60\strut
+\end{minipage} & \begin{minipage}[t]{0.06\columnwidth}\raggedleft
+3.75\strut
+\end{minipage} & \begin{minipage}[t]{0.06\columnwidth}\raggedleft
+9.95\strut
+\end{minipage} & \begin{minipage}[t]{0.06\columnwidth}\raggedleft
+17.70\strut
+\end{minipage} & \begin{minipage}[t]{0.06\columnwidth}\raggedleft
+168469.6\strut
+\end{minipage} & \begin{minipage}[t]{0.04\columnwidth}\raggedright
+▁▁▇▁▁\strut
+\end{minipage}\tabularnewline
+\bottomrule
+\end{longtable}
+
+The only data that we appear to be missing is CustomerID. This is
+probably due to the customer only making a one time purchase without
+making an account. I plan to filter these customers out later when I
+predict the customer's future CLV values.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{range}\NormalTok{(retail}\OperatorTok{$}\NormalTok{InvoiceDate)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] "2010-12-01" "2011-12-09"
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{#the data only accounts for a month and half of data.}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{#looking at revenue by the dates}
+\NormalTok{revenue_by_month <-}\StringTok{ }\NormalTok{retail }\OperatorTok{%>%}\StringTok{ }
+\StringTok{  }\KeywordTok{group_by}\NormalTok{(}\DataTypeTok{month =} \KeywordTok{floor_date}\NormalTok{(InvoiceDate, }\StringTok{"month"}\NormalTok{)) }\OperatorTok{%>%}\StringTok{ }
+\StringTok{  }\KeywordTok{summarise}\NormalTok{(}\DataTypeTok{revenue =} \KeywordTok{sum}\NormalTok{(sales)) }\OperatorTok{%>%}\StringTok{ }
+\StringTok{  }\KeywordTok{ungroup}\NormalTok{()}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## `summarise()` ungrouping output (override with `.groups` argument)
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{ revenue_by_month }\OperatorTok{%>%}\StringTok{ }
+\StringTok{  }\KeywordTok{ggplot}\NormalTok{(}\KeywordTok{aes}\NormalTok{(month, revenue)) }\OperatorTok{+}\StringTok{ }
+\StringTok{  }\KeywordTok{geom_point}\NormalTok{()}\OperatorTok{+}
+\StringTok{  }\KeywordTok{geom_line}\NormalTok{() }\OperatorTok{+}
+\StringTok{   }\KeywordTok{labs}\NormalTok{(}\DataTypeTok{x =} \StringTok{""}\NormalTok{, }\DataTypeTok{y =} \StringTok{"Revenue"}\NormalTok{, }\DataTypeTok{title =} \StringTok{"Revenue by Month"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{clv_exploring_files/figure-latex/unnamed-chunk-4-1.pdf}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{#there is a very large spike in revenue during November. This is probably due to Black Friday sales, or early Christmas shopping.}
+\CommentTok{#december 2011 has low numbers in sales. this is most likely due to the data not being complete}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{#looking at the monthly growth rate}
+\NormalTok{monthly_growth <-}\StringTok{ }\KeywordTok{rep}\NormalTok{(}\OtherTok{NA}\NormalTok{, }\KeywordTok{nrow}\NormalTok{(revenue_by_month))}
+\NormalTok{monthly_growth[}\DecValTok{1}\NormalTok{] <-}\StringTok{ }\DecValTok{0}
+\ControlFlowTok{for}\NormalTok{(i }\ControlFlowTok{in} \DecValTok{2}\OperatorTok{:}\KeywordTok{nrow}\NormalTok{(revenue_by_month}\DecValTok{-1}\NormalTok{))}
+\NormalTok{\{}
+\NormalTok{  monthly_growth[i] <-}\StringTok{ }\NormalTok{(revenue_by_month}\OperatorTok{$}\NormalTok{revenue[i] }\OperatorTok{-}\StringTok{ }\NormalTok{revenue_by_month}\OperatorTok{$}\NormalTok{revenue[i}\DecValTok{-1}\NormalTok{])}\OperatorTok{/}\NormalTok{revenue_by_month}\OperatorTok{$}\NormalTok{revenue[i}\DecValTok{-1}\NormalTok{]}
+\NormalTok{\}}
+\NormalTok{revenue_by_month}\OperatorTok{$}\NormalTok{monthly_growth <-}\StringTok{ }\NormalTok{monthly_growth}
+\NormalTok{revenue_by_month }\OperatorTok{%>%}\StringTok{ }
+\StringTok{  }\KeywordTok{filter}\NormalTok{(month }\OperatorTok{!=}\StringTok{ "2011-12-01"}\NormalTok{) }\OperatorTok{%>%}\StringTok{ }
+\StringTok{  }\KeywordTok{ggplot}\NormalTok{(}\KeywordTok{aes}\NormalTok{(month, monthly_growth)) }\OperatorTok{+}\StringTok{ }
+\StringTok{  }\KeywordTok{geom_point}\NormalTok{() }\OperatorTok{+}\StringTok{ }
+\StringTok{  }\KeywordTok{geom_line}\NormalTok{()}\OperatorTok{+}
+\StringTok{  }\KeywordTok{geom_hline}\NormalTok{(}\DataTypeTok{yintercept =} \DecValTok{0}\NormalTok{, }\DataTypeTok{lty =} \DecValTok{2}\NormalTok{) }\OperatorTok{+}\StringTok{ }
+\StringTok{  }\KeywordTok{labs}\NormalTok{(}\DataTypeTok{title =} \StringTok{"Monthly Growth"}\NormalTok{, }\DataTypeTok{y =} \StringTok{""}\NormalTok{) }\OperatorTok{+}\StringTok{ }
+\StringTok{  }\KeywordTok{scale_y_continuous}\NormalTok{(}\DataTypeTok{labels =}\NormalTok{ scales}\OperatorTok{::}\KeywordTok{percent_format}\NormalTok{())}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{clv_exploring_files/figure-latex/unnamed-chunk-5-1.pdf}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{#I'm excluding 2011 December from this graph because the data is still incomplete.}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{#looking at monthly active customers}
+\NormalTok{retail }\OperatorTok{%>%}\StringTok{ }
+\StringTok{  }\KeywordTok{filter}\NormalTok{(}\OperatorTok{!}\KeywordTok{is.na}\NormalTok{(CustomerID)) }\OperatorTok{%>%}\StringTok{ }
+\StringTok{  }\KeywordTok{group_by}\NormalTok{(}\DataTypeTok{month =} \KeywordTok{floor_date}\NormalTok{(InvoiceDate, }\StringTok{"month"}\NormalTok{), CustomerID) }\OperatorTok{%>%}\StringTok{ }
+\StringTok{  }\KeywordTok{summarise}\NormalTok{(}\DataTypeTok{count =} \KeywordTok{n}\NormalTok{()) }\OperatorTok{%>%}\StringTok{ }
+\StringTok{  }\KeywordTok{ungroup}\NormalTok{() }\OperatorTok{%>%}\StringTok{ }
+\StringTok{  }\KeywordTok{count}\NormalTok{(month) }\OperatorTok{%>%}\StringTok{ }
+\StringTok{  }\KeywordTok{filter}\NormalTok{(month }\OperatorTok{!=}\StringTok{ "2011-12-01"}\NormalTok{) }\OperatorTok{%>%}\StringTok{ }
+\StringTok{  }\KeywordTok{ggplot}\NormalTok{(}\KeywordTok{aes}\NormalTok{(month, n)) }\OperatorTok{+}\StringTok{ }
+\StringTok{  }\KeywordTok{geom_point}\NormalTok{() }\OperatorTok{+}\StringTok{ }
+\StringTok{  }\KeywordTok{geom_line}\NormalTok{()}\OperatorTok{+}\StringTok{ }
+\StringTok{  }\KeywordTok{labs}\NormalTok{(}\DataTypeTok{y =} \StringTok{"Number of Active Users"}\NormalTok{, }\DataTypeTok{x =} \StringTok{""}\NormalTok{, }\DataTypeTok{title =} \StringTok{"Number of Active Users per Month"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## `summarise()` regrouping output by 'month' (override with `.groups` argument)
+\end{verbatim}
+
+\includegraphics{clv_exploring_files/figure-latex/unnamed-chunk-6-1.pdf}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{#looks like there is consistent growth in the number of active users per month}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{#taking a look a new customers per month}
+\NormalTok{retail }\OperatorTok{%>%}\StringTok{ }
+\StringTok{  }\KeywordTok{distinct}\NormalTok{(CustomerID, InvoiceDate) }\OperatorTok{%>%}\StringTok{ }
+\StringTok{  }\KeywordTok{group_by}\NormalTok{(CustomerID) }\OperatorTok{%>%}\StringTok{ }
+\StringTok{  }\KeywordTok{summarise}\NormalTok{(}\DataTypeTok{first_purchase_date =} \KeywordTok{min}\NormalTok{(InvoiceDate)) }\OperatorTok{%>%}\StringTok{ }
+\StringTok{  }\KeywordTok{ungroup}\NormalTok{() }\OperatorTok{%>%}\StringTok{ }
+\StringTok{  }\KeywordTok{count}\NormalTok{(first_purchase_date) }\OperatorTok{%>%}\StringTok{ }
+\StringTok{  }\KeywordTok{group_by}\NormalTok{(}\DataTypeTok{month =} \KeywordTok{floor_date}\NormalTok{(first_purchase_date, }\StringTok{"month"}\NormalTok{)) }\OperatorTok{%>%}\StringTok{ }
+\StringTok{  }\KeywordTok{summarise}\NormalTok{(}\DataTypeTok{new_customers =} \KeywordTok{sum}\NormalTok{(n)) }\OperatorTok{%>%}\StringTok{ }
+\StringTok{  }\KeywordTok{filter}\NormalTok{(month }\OperatorTok{!=}\StringTok{ "2011-12-01"}\NormalTok{, month }\OperatorTok{!=}\StringTok{ "2010-12-01"}\NormalTok{) }\OperatorTok{%>%}\StringTok{  }\CommentTok{#filtering out december because data is still incomplete}
+\StringTok{  }\KeywordTok{ggplot}\NormalTok{(}\KeywordTok{aes}\NormalTok{(month, new_customers)) }\OperatorTok{+}\StringTok{ }
+\StringTok{  }\KeywordTok{geom_point}\NormalTok{() }\OperatorTok{+}\StringTok{ }
+\StringTok{  }\KeywordTok{geom_line}\NormalTok{()}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## `summarise()` ungrouping output (override with `.groups` argument)
+## `summarise()` ungrouping output (override with `.groups` argument)
+\end{verbatim}
+
+\includegraphics{clv_exploring_files/figure-latex/unnamed-chunk-7-1.pdf}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{#we didn't have many new customers from June through August. Starting September there was a spike in new customers once again}
+\end{Highlighting}
+\end{Shaded}
+
+\hypertarget{rfm-recency-frequency-monetary-value-clustering}{%
+\subsection{RFM (recency, frequency, monetary value)
+Clustering}\label{rfm-recency-frequency-monetary-value-clustering}}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{library}\NormalTok{(cluster)}
+\KeywordTok{library}\NormalTok{(factoextra)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Welcome! Want to learn more? See two factoextra-related books at https://goo.gl/ve3WBa
+\end{verbatim}
+
+Calculating recency. Recency score is equal to the most recent purchase
+subtracted by the customer's most recent purchase.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{#going to calculate recency by subtracting the customer's most recent transcation by the max of the invoice date}
+\NormalTok{maxdate <-}\StringTok{ }\KeywordTok{max}\NormalTok{(retail}\OperatorTok{$}\NormalTok{InvoiceDate)}
+
+\NormalTok{recency_scores <-}\StringTok{ }\NormalTok{retail }\OperatorTok{%>%}\StringTok{ }
+\StringTok{  }\KeywordTok{filter}\NormalTok{(}\OperatorTok{!}\KeywordTok{is.na}\NormalTok{(CustomerID)) }\OperatorTok{%>%}\StringTok{ }
+\StringTok{  }\KeywordTok{group_by}\NormalTok{(CustomerID) }\OperatorTok{%>%}\StringTok{ }
+\StringTok{  }\KeywordTok{summarise}\NormalTok{(}\DataTypeTok{recency =}\NormalTok{ maxdate }\OperatorTok{-}\StringTok{ }\KeywordTok{max}\NormalTok{(InvoiceDate)) }
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## `summarise()` ungrouping output (override with `.groups` argument)
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{#distribution of recency scores}
+\NormalTok{recency_scores }\OperatorTok{%>%}\StringTok{ }
+\StringTok{  }\KeywordTok{ggplot}\NormalTok{(}\KeywordTok{aes}\NormalTok{(recency)) }\OperatorTok{+}\StringTok{ }
+\StringTok{  }\KeywordTok{geom_histogram}\NormalTok{()}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Don't know how to automatically pick scale for object of type difftime. Defaulting to continuous.
+\end{verbatim}
+
+\begin{verbatim}
+## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
+\end{verbatim}
+
+\includegraphics{clv_exploring_files/figure-latex/unnamed-chunk-9-1.pdf}
+
+Choosing the number of clusters for recency and then using kmeans
+clustering
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{#elbow method to see optimal number of clusters}
+\KeywordTok{fviz_nbclust}\NormalTok{(}\KeywordTok{as.matrix}\NormalTok{(recency_scores}\OperatorTok{$}\NormalTok{recency), kmeans, }\DataTypeTok{method =} \StringTok{"wss"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{clv_exploring_files/figure-latex/unnamed-chunk-10-1.pdf}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{#looking at the elbow plot, it seems it would be optimal to do 4 clusters}
+
+\NormalTok{recency_cluster <-}\StringTok{ }\KeywordTok{kmeans}\NormalTok{(recency_scores}\OperatorTok{$}\NormalTok{recency, }\DecValTok{4}\NormalTok{)}
+\NormalTok{recency_center <-}\StringTok{ }\KeywordTok{sort}\NormalTok{(}\KeywordTok{desc}\NormalTok{(recency_cluster}\OperatorTok{$}\NormalTok{centers)) }\OperatorTok{*}\StringTok{ }\DecValTok{-1}
+\NormalTok{recency_cluster <-}\StringTok{ }\KeywordTok{kmeans}\NormalTok{(recency_scores}\OperatorTok{$}\NormalTok{recency, }\DataTypeTok{centers =}\NormalTok{ recency_center) }
+\CommentTok{#doing it twice to order the clusters by the cluster means}
+\NormalTok{recency_scores}\OperatorTok{$}\NormalTok{r_clus <-}\StringTok{ }\NormalTok{recency_cluster}\OperatorTok{$}\NormalTok{cluster}
+
+\CommentTok{#the higher the score, the more recently they've purchased an item}
+\end{Highlighting}
+\end{Shaded}
+
+Calculating Frequency. Total number of order by a certain customer.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{#We'll be counting each invoice number as one order.}
+\NormalTok{frequency_scores <-}\StringTok{ }\NormalTok{retail }\OperatorTok{%>%}\StringTok{ }
+\StringTok{  }\KeywordTok{filter}\NormalTok{(}\OperatorTok{!}\KeywordTok{is.na}\NormalTok{(CustomerID)) }\OperatorTok{%>%}\StringTok{ }
+\StringTok{  }\KeywordTok{count}\NormalTok{(CustomerID, InvoiceNo) }\OperatorTok{%>%}\StringTok{ }
+\StringTok{  }\KeywordTok{count}\NormalTok{(CustomerID, }\DataTypeTok{sort =} \OtherTok{TRUE}\NormalTok{)}
+
+\CommentTok{#distribution of the frequency scores}
+\NormalTok{retail }\OperatorTok{%>%}\StringTok{ }
+\StringTok{  }\KeywordTok{filter}\NormalTok{(}\OperatorTok{!}\KeywordTok{is.na}\NormalTok{(CustomerID)) }\OperatorTok{%>%}\StringTok{ }
+\StringTok{  }\KeywordTok{count}\NormalTok{(CustomerID, InvoiceNo) }\OperatorTok{%>%}\StringTok{ }
+\StringTok{  }\KeywordTok{count}\NormalTok{(CustomerID, }\DataTypeTok{sort =} \OtherTok{TRUE}\NormalTok{) }\OperatorTok{%>%}\StringTok{ }
+\StringTok{  }\KeywordTok{ggplot}\NormalTok{(}\KeywordTok{aes}\NormalTok{(n)) }\OperatorTok{+}\StringTok{ }
+\StringTok{  }\KeywordTok{geom_histogram}\NormalTok{(}\DataTypeTok{binwidth =} \DecValTok{15}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{clv_exploring_files/figure-latex/unnamed-chunk-11-1.pdf}
+
+Choosing the optimal number of clusters for frequency and doing k means
+clustering.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{fviz_nbclust}\NormalTok{(}\KeywordTok{as.matrix}\NormalTok{(frequency_scores}\OperatorTok{$}\NormalTok{n), kmeans, }\DataTypeTok{method =} \StringTok{"wss"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{clv_exploring_files/figure-latex/unnamed-chunk-12-1.pdf}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{#looking at the elbow plot, it seems it would be optimal to do 5 clusters. However, to be consistent with recency, I will do 4 clusters once again.}
+
+\NormalTok{frequency_cluster <-}\StringTok{ }\KeywordTok{kmeans}\NormalTok{(frequency_scores}\OperatorTok{$}\NormalTok{n, }\DecValTok{4}\NormalTok{)}
+\NormalTok{frequency_center <-}\StringTok{ }\KeywordTok{sort}\NormalTok{(frequency_cluster}\OperatorTok{$}\NormalTok{centers)}
+\NormalTok{frequency_cluster <-}\StringTok{ }\KeywordTok{kmeans}\NormalTok{(frequency_scores}\OperatorTok{$}\NormalTok{n, }\DataTypeTok{centers =}\NormalTok{ frequency_center) }
+\CommentTok{#doing it twice to order the clusters by the cluster means}
+\NormalTok{frequency_scores}\OperatorTok{$}\NormalTok{f_clus<-}\StringTok{ }\NormalTok{frequency_cluster}\OperatorTok{$}\NormalTok{cluster}
+\end{Highlighting}
+\end{Shaded}
+
+Calculating monetary value
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{#we are going to be calculating the total revenue each customer brought in}
+\NormalTok{money_scores <-}\StringTok{ }\NormalTok{retail }\OperatorTok{%>%}\StringTok{ }
+\StringTok{  }\KeywordTok{filter}\NormalTok{(}\OperatorTok{!}\KeywordTok{is.na}\NormalTok{(CustomerID)) }\OperatorTok{%>%}\StringTok{ }
+\StringTok{  }\KeywordTok{group_by}\NormalTok{(CustomerID) }\OperatorTok{%>%}\StringTok{ }
+\StringTok{  }\KeywordTok{summarise}\NormalTok{(}\DataTypeTok{total_revenue =} \KeywordTok{sum}\NormalTok{(sales))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## `summarise()` ungrouping output (override with `.groups` argument)
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{#looking at the distribution of monetary value}
+\NormalTok{money_scores }\OperatorTok{%>%}\StringTok{ }
+\StringTok{  }\KeywordTok{ggplot}\NormalTok{(}\KeywordTok{aes}\NormalTok{(total_revenue)) }\OperatorTok{+}\StringTok{ }
+\StringTok{  }\KeywordTok{geom_histogram}\NormalTok{()}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
+\end{verbatim}
+
+\includegraphics{clv_exploring_files/figure-latex/unnamed-chunk-13-1.pdf}
+
+Choosing optimal number of clusters for monetary value and doing k means
+clustering
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{fviz_nbclust}\NormalTok{(}\KeywordTok{as.matrix}\NormalTok{(money_scores}\OperatorTok{$}\NormalTok{total_revenue), kmeans, }\DataTypeTok{method =} \StringTok{"wss"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{clv_exploring_files/figure-latex/unnamed-chunk-14-1.pdf}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{#looking at the elbow plot, it seems it would be optimal to do 4 clusters. }
+
+\NormalTok{money_cluster <-}\StringTok{ }\KeywordTok{kmeans}\NormalTok{(money_scores}\OperatorTok{$}\NormalTok{total_revenue, }\DecValTok{4}\NormalTok{)}
+\NormalTok{money_center <-}\StringTok{ }\KeywordTok{sort}\NormalTok{(money_cluster}\OperatorTok{$}\NormalTok{centers)}
+\NormalTok{money_cluster <-}\StringTok{ }\KeywordTok{kmeans}\NormalTok{(money_scores}\OperatorTok{$}\NormalTok{total_revenue, }\DataTypeTok{centers =}\NormalTok{ money_center) }
+\CommentTok{#doing it twice to order the clusters by the cluster means}
+\NormalTok{money_scores}\OperatorTok{$}\NormalTok{m_clus <-}\StringTok{ }\NormalTok{money_cluster}\OperatorTok{$}\NormalTok{cluster}
+\end{Highlighting}
+\end{Shaded}
+
+Combining all the scores together
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{frequency_scores <-}\StringTok{ }\NormalTok{frequency_scores }\OperatorTok{%>%}\StringTok{ }
+\StringTok{  }\KeywordTok{arrange}\NormalTok{(CustomerID)}
+
+\NormalTok{rfm_scores <-}\StringTok{ }\KeywordTok{as_tibble}\NormalTok{(}\KeywordTok{data.frame}\NormalTok{(recency_scores, frequency_scores[}\OperatorTok{-}\DecValTok{1}\NormalTok{], money_scores[}\OperatorTok{-}\DecValTok{1}\NormalTok{]))}
+\KeywordTok{colnames}\NormalTok{(rfm_scores) <-}\StringTok{ }\KeywordTok{c}\NormalTok{(}\StringTok{"CustomerID"}\NormalTok{,}\StringTok{"recency"}\NormalTok{,}\StringTok{"r_clus"}\NormalTok{,}\StringTok{"frequency"}\NormalTok{,}\StringTok{"f_clus"}\NormalTok{,}\StringTok{"money_value"}\NormalTok{,}\StringTok{"m_clus"}\NormalTok{)}
+\NormalTok{rfm_scores <-}\StringTok{ }\NormalTok{rfm_scores }\OperatorTok{%>%}\StringTok{ }
+\StringTok{  }\KeywordTok{group_by}\NormalTok{(CustomerID) }\OperatorTok{%>%}\StringTok{ }
+\StringTok{  }\KeywordTok{mutate}\NormalTok{(}\DataTypeTok{score =} \KeywordTok{sum}\NormalTok{(r_clus,f_clus,m_clus)) }\OperatorTok{%>%}\StringTok{ }
+\StringTok{  }\KeywordTok{ungroup}\NormalTok{()}
+
+
+\CommentTok{#looking at the distribution of scores. Nobody got a perfect score of 12}
+\NormalTok{rfm_scores }\OperatorTok{%>%}\StringTok{ }
+\StringTok{  }\KeywordTok{count}\NormalTok{(score) }\OperatorTok{%>%}\StringTok{ }
+\StringTok{  }\KeywordTok{ggplot}\NormalTok{(}\KeywordTok{aes}\NormalTok{(}\KeywordTok{as.factor}\NormalTok{(score), n)) }\OperatorTok{+}\StringTok{ }
+\StringTok{  }\KeywordTok{geom_col}\NormalTok{() }\OperatorTok{+}
+\StringTok{  }\KeywordTok{labs}\NormalTok{(}\DataTypeTok{title=} \StringTok{"Distribution of Scores"}\NormalTok{, }\DataTypeTok{x =} \StringTok{"Score"}\NormalTok{, }\DataTypeTok{y=} \StringTok{""}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{clv_exploring_files/figure-latex/unnamed-chunk-15-1.pdf}
+
+The scores range from 3-12.
+
+I will value 3-4 as low value customers. 5-7 as mid value customers.
+8-11 as high value customers.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ControlFlowTok{for}\NormalTok{(i }\ControlFlowTok{in} \DecValTok{1}\OperatorTok{:}\KeywordTok{nrow}\NormalTok{(rfm_scores))}
+\NormalTok{\{}
+  \ControlFlowTok{if}\NormalTok{(rfm_scores}\OperatorTok{$}\NormalTok{score[i] }\OperatorTok{<=}\StringTok{ }\DecValTok{4}\NormalTok{)}
+\NormalTok{  \{}
+\NormalTok{    rfm_scores}\OperatorTok{$}\NormalTok{value[i] =}\StringTok{ "low"}
+\NormalTok{  \}}
+  \ControlFlowTok{else} \ControlFlowTok{if}\NormalTok{(rfm_scores}\OperatorTok{$}\NormalTok{score[i] }\OperatorTok{>}\StringTok{ }\DecValTok{4} \OperatorTok{&&}\StringTok{ }\NormalTok{rfm_scores}\OperatorTok{$}\NormalTok{score[i] }\OperatorTok{<}\DecValTok{8}\NormalTok{)}
+\NormalTok{  \{}
+\NormalTok{    rfm_scores}\OperatorTok{$}\NormalTok{value[i] =}\StringTok{ "mid"}
+\NormalTok{  \}}
+  \ControlFlowTok{else}
+\NormalTok{  \{}
+\NormalTok{    rfm_scores}\OperatorTok{$}\NormalTok{value[i] =}\StringTok{ "high"}
+\NormalTok{  \}}
+\NormalTok{\}}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Warning: Unknown or uninitialised column: `value`.
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{rfm_scores}\OperatorTok{$}\NormalTok{value <-}\StringTok{ }\KeywordTok{as.factor}\NormalTok{(rfm_scores}\OperatorTok{$}\NormalTok{value)}
+\end{Highlighting}
+\end{Shaded}
+
+Taking a look at how our valued customers are distributed in a
+scatterplot.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{rfm_scores }\OperatorTok{%>%}\StringTok{ }
+\StringTok{  }\KeywordTok{ggplot}\NormalTok{(}\KeywordTok{aes}\NormalTok{(recency, frequency, }\DataTypeTok{color =}\NormalTok{ value)) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{geom_point}\NormalTok{()}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Don't know how to automatically pick scale for object of type difftime. Defaulting to continuous.
+\end{verbatim}
+
+\includegraphics{clv_exploring_files/figure-latex/unnamed-chunk-17-1.pdf}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{rfm_scores }\OperatorTok{%>%}\StringTok{ }
+\StringTok{  }\KeywordTok{ggplot}\NormalTok{(}\KeywordTok{aes}\NormalTok{(recency, money_value, }\DataTypeTok{color =}\NormalTok{ value))}\OperatorTok{+}
+\StringTok{  }\KeywordTok{geom_point}\NormalTok{()}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Don't know how to automatically pick scale for object of type difftime. Defaulting to continuous.
+\end{verbatim}
+
+\includegraphics{clv_exploring_files/figure-latex/unnamed-chunk-17-2.pdf}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{rfm_scores }\OperatorTok{%>%}\StringTok{ }
+\StringTok{  }\KeywordTok{ggplot}\NormalTok{(}\KeywordTok{aes}\NormalTok{(frequency,money_value, }\DataTypeTok{color =}\NormalTok{ value)) }\OperatorTok{+}\StringTok{ }
+\StringTok{  }\KeywordTok{geom_point}\NormalTok{()}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{clv_exploring_files/figure-latex/unnamed-chunk-17-3.pdf}
+
+Saving the scores dataset
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{write.csv}\NormalTok{(rfm_scores, }\StringTok{"rfm_scores.csv"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\end{document}

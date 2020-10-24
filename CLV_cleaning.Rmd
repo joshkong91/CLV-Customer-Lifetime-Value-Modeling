@@ -1,0 +1,87 @@
+---
+title: "CLV_Cleaning"
+author: "Josh Kong"
+date: "10/8/2020"
+output: pdf_document
+editor_options: 
+  chunk_output_type: console
+---
+
+Loading in the dataset and neccesary libraries
+```{r}
+library(tidyverse)
+library(lubridate)
+retail <- read_csv("retails_online.csv")
+```
+
+I noticed that some of the descriptions have NA values, and some item codes have more than 1 descriptions due to a difference in syntax. Let's clean this up.
+```{r}
+retail %>% 
+  filter(is.na(Description)) %>% 
+  head(10)
+
+#this will make filtering a lot easier
+`%notin%` <- Negate(`%in%`)
+#Description is usually an NA when the CustomerID is NA as well, but the StockCode is not NA. I will fill in the NA with the description that is assigned to that StockCode
+descriptions <- retail %>% 
+  filter(!is.na(Description)) %>% 
+  count(StockCode, Description, sort = TRUE) %>% 
+  dplyr::select(StockCode, Description)
+
+#I noticed that some of the item codes have more than 1 descriptions. Taking a closer look, a lot of the descriptions appear to be very redu 
+#These are the items with multiple descriptions
+descriptions_mult <- descriptions %>% 
+  count(StockCode, Description,sort = TRUE) %>% 
+  count(StockCode, sort = TRUE)
+
+#items with only one description
+descriptions_single <- descriptions %>% 
+  filter(StockCode %notin% descriptions_mult$StockCode)
+
+#some item codes have more than one descriptions. These are the redundant descriptions that I'll be filtering out.
+filter_words <- c("LUNCH BAG RED RETROSPOT", "?","Found","found", "SET/5 RED RETROSPOT LID GLASS BOWLS",
+                  "LARGE CAKE TOWEL, CHOCOLATE SPOTS","SWISS ROLL TOWEL, PINK  SPOTS","MINI LADLE LOVE HEART RED",
+                  "MINI LADLE LOVE HEART PINK","amazon","FRYING PAN RED RETROSPOT","GARLAND, MAGIC GARDEN 1.8M",
+                  "DECORATION HEN ON NEST, HANGING","faulty","reverse 21/5/10 adjustment","mouldy, thrown away.",
+                  "HAND WARMER RED RETROSPOT","amazon sales","CAKESTAND, 3 TIER, LOVEHEART","GLASS BELL JAR LARGE",
+                  "GLASS BELL JAR SMALL","HOT WATER BOTTLE BABUSHKA","BREAD BIN, DINER STYLE, IVORY",
+                  "BREAD BIN, DINER STYLE, MINT","PEG BAG APPLE DESIGN", "BAKING MOULD TOFFEE CUP  CHOCOLATE",
+                  "BAKING MOULD CHOCOLATE CUP CAKES", "BAKING MOULD CUPCAKE CHOCOLATE",
+                  "60 CAKE CASES VINTAGE CHRISTMAS", "BIRTHDAY PARTY CORDON BARRIER TAPE", "JAM JAR WITH BLUE LID", "3 TRADITIONAl BISCUIT CUTTERS  SET","CHILDRENS SPACEBOY MUG","damages", "Dotcom sales", "Dotcom","counted", "check",
+                  "JARDIN ETCHED GLASS CHEESE DISH")
+
+descriptions_cleaned <- descriptions %>% 
+  filter(StockCode %in% c(descriptions_mult$StockCode)) %>% 
+  arrange(StockCode) %>%
+  filter(Description %notin% filter_words)
+
+description_final <- rbind(descriptions_single, descriptions_cleaned)
+
+#I filled in the NA for the descriptions with the correct item in the item code
+#also got rid of redundant descriptions (most stock codes only have one description now)
+retail_cleaned <- retail %>% 
+  dplyr::select(-Description) %>% 
+  inner_join(description_final)
+```
+
+```{r}
+retail_cleaned <- retail_cleaned %>% 
+  mutate(sales = Quantity * UnitPrice)
+retail_cleaned$InvoiceDate <- mdy_hm(retail_cleaned$InvoiceDate)
+retail_cleaned$InvoiceDate <- as.Date(strftime(retail_cleaned$InvoiceDate, format="%Y-%m-%d"))
+#Looking at the first ten rows of the dataset
+head(retail_cleaned,10)
+
+write.csv(retail_cleaned, "retail_cleaned.csv")
+```
+
+
+
+
+
+
+
+
+
+
+

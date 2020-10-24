@@ -1,0 +1,252 @@
+---
+title: "CLV Model Building"
+author: "Josh Kong"
+date: "10/19/2020"
+output: pdf_document
+editor_options: 
+  chunk_output_type: console
+---
+
+OBJECTIVE: I am going to be building a model that will predict each customer's CLV within a year, and within 5 years. 
+I'm going to be using a BTYD (buy til you die) model to achieve this.
+
+NOTE: The retail dataset I'm currently using ranges from December 1, 2010 - December 9, 2011. Approximately 1 year. 
+
+
+I'm going to begin with filtering out customer's without an ID. We are trying to predict the CLV of customers, and we wont be able to do that with customers who do not have an ID. I'm also going to be joining the rfm scores and value of the customer to use as features for building the model.
+
+```{r}
+library(tidyverse)
+library(CLVTools)
+library(tidymodels)
+retail <- read_csv("retail_cleaned.csv")
+rfm_scores <- read_csv("rfm_scores.csv")
+
+
+#joining rfm scores with retail data
+rfm_join <- rfm_scores %>% 
+  select(value, CustomerID)
+
+retail_filtered <- retail %>% 
+  filter(!is.na(CustomerID)) %>% 
+  left_join(rfm_join, by = "CustomerID") %>% 
+  select(-X1)
+```
+
+I'm now going to be calculating the CLV of each customer. Because there is no cost specified in this dataset, I'm going to be using revenue as CLV.
+
+```{r}
+#calculating CLV of customers
+customer_clv <- retail_filtered %>% 
+  group_by(CustomerID) %>% 
+  summarise(CLV = sum(sales))
+```
+
+The model doesn't take in negative values for sales. The negative value usually means that a customer made a return. I will filter out all the invoices where the customer made a return.
+```{r}
+negative_sales <- retail_filtered %>% 
+  filter(sales < 0) %>% 
+  select(InvoiceNo)
+
+`%notin%` <- Negate(`%in%`)
+
+#getting rid of all the invoice numbers that ended in a return
+retail_filtered <- retail_filtered %>% 
+  filter(InvoiceNo %notin% negative_sales$InvoiceNo, CustomerID != 12346)
+```
+
+
+
+Going to create a CLV model. Only going to use 3 months worth of data to train the model. 
+```{r}
+library(BTYDplus)
+retail_train_3 <- retail_filtered %>% 
+  filter(InvoiceDate < "2011-03-01") 
+colnames(retail_train_3)[c(4,6)] <- c("date","cust")
+
+customer_rdf_3 <- BTYDplus::elog2cbs(retail_train_3,
+unit = 'days',
+T.cal = max(retail_train_3$date),
+T.tot = max(retail_train_3$date))
+customer_rdf_3$sales_avg = customer_rdf_3$sales / (customer_rdf_3$x + 1)
+
+bgnbd_rdf = customer_rdf_3
+bgnbd_rdf$T.star = 273
+
+params_bgnbd = BTYD::bgnbd.EstimateParameters(bgnbd_rdf)
+bgnbd_rdf$predicted_bgnbd = BTYD::bgnbd.ConditionalExpectedTransactions(
+params = params_bgnbd,
+T.star = bgnbd_rdf$T.star,
+x = bgnbd_rdf$x,
+t.x = bgnbd_rdf$t.x,
+T.cal = bgnbd_rdf$T.cal
+)
+bgnbd_rdf$predicted_clv = bgnbd_rdf$sales_avg * bgnbd_rdf$predicted_bgnbd
+
+```
+
+After using only the first 3 months of the training data to predict the future 1 year clv, let's compare how the actual 1 year clv and the predicted clv differ.
+
+```{r}
+predictions_comparison <- bgnbd_rdf %>% 
+  select(predicted_clv, cust)
+
+colnames(predictions_comparison)[2] <- "CustomerID"
+predictions_comparison$CustomerID <- as.double(predictions_comparison$CustomerID)
+colnames(retail_train_3)[6] <- "CustomerID"
+
+customers_3months <- retail_train_3 %>% 
+  distinct(CustomerID)
+
+predicted_vs_actual <- customer_clv %>% 
+  filter(CustomerID %in% customers_3months$CustomerID) %>% 
+  left_join(predictions_comparison, by = "CustomerID") %>% 
+  mutate(difference = CLV - predicted_clv)
+
+predicted_vs_actual %>% 
+  ggplot(aes(difference)) + 
+  geom_histogram() + 
+  scale_x_log10()
+
+predicted_vs_actual %>% 
+  pivot_longer(CLV:predicted_clv) %>% 
+  ggplot(aes(value, color = name)) + 
+  geom_density() + 
+  scale_x_log10() + 
+  labs(title = "Density Curve of predicted vs actual") 
+
+predicted_vs_actual %>% 
+  summarise(mean(abs(difference)))
+```
+Looks like the predicted CLV is usually underestimating how valuable the customer will be. While testing the model, I got a mean absolute error of 2743 Using this model will lead to us undervaluing a lot of customers in the end. However, customers that we do consider valuable in this model, will truly be valuable.
+
+
+## Model on entire set
+After testing the model, it appears that we tend to overvalue our customers with this BTYD model. However, I'm still going to use this model to predict which customers will remain valuable to to online retail store after a year and 3 years. Because the model has shown to undervalue the customer's future clv, customer's that we see as valuable with the predicted CLV, will most likely be valuable in the future as well. 
+
+```{r}
+head(retail_filtered)
+colnames(retail_filtered)[c(4,6)] <- c("date","cust")
+
+customer_rdf_1year <- BTYDplus::elog2cbs(retail_filtered,
+unit = 'days',
+T.cal = max(retail_filtered$date),
+T.tot = max(retail_filtered$date))
+customer_rdf_1year$sales_avg = customer_rdf_1year$sales / (customer_rdf_1year$x + 1)
+
+bgnbd_rdf = customer_rdf_1year
+bgnbd_rdf$T.star = 365
+
+params_bgnbd = BTYD::bgnbd.EstimateParameters(bgnbd_rdf)
+bgnbd_rdf$predicted_bgnbd = BTYD::bgnbd.ConditionalExpectedTransactions(
+params = params_bgnbd,
+T.star = bgnbd_rdf$T.star,
+x = bgnbd_rdf$x,
+t.x = bgnbd_rdf$t.x,
+T.cal = bgnbd_rdf$T.cal
+)
+bgnbd_rdf$predicted_clv = bgnbd_rdf$sales_avg * bgnbd_rdf$predicted_bgnbd
+
+#these are our 1 year later predictions
+
+head(bgnbd_rdf)
+bgnbd_rdf_predicted1year <- bgnbd_rdf %>% 
+  select(cust, predicted_1yr_clv = predicted_clv)
+#joining it with our original dataset
+retail_predicted_clv <- retail_filtered %>% 
+  left_join(bgnbd_rdf_predicted1year, by = "cust")
+  
+```
+
+We have our 1 year predicitions. Now I'm going to make 3 year predictions.
+
+```{r}
+#1095
+customer_rdf_3year <- BTYDplus::elog2cbs(retail_filtered,
+unit = 'days',
+T.cal = max(retail_filtered$date),
+T.tot = max(retail_filtered$date))
+customer_rdf_3year$sales_avg = customer_rdf_3year$sales / (customer_rdf_3year$x + 1)
+
+bgnbd_rdf = customer_rdf_3year
+bgnbd_rdf$T.star = 1095
+
+params_bgnbd = BTYD::bgnbd.EstimateParameters(bgnbd_rdf)
+bgnbd_rdf$predicted_bgnbd = BTYD::bgnbd.ConditionalExpectedTransactions(
+params = params_bgnbd,
+T.star = bgnbd_rdf$T.star,
+x = bgnbd_rdf$x,
+t.x = bgnbd_rdf$t.x,
+T.cal = bgnbd_rdf$T.cal
+)
+bgnbd_rdf$predicted_clv = bgnbd_rdf$sales_avg * bgnbd_rdf$predicted_bgnbd
+
+#these are our 3 year later predictions
+
+head(bgnbd_rdf)
+bgnbd_rdf_predicted3year <- bgnbd_rdf %>% 
+  select(cust, predicted_3yr_clv = predicted_clv)
+#joining it with our original dataset
+retail_predicted_clv <- retail_predicted_clv %>% 
+  left_join(bgnbd_rdf_predicted3year, by = "cust")
+
+retail_predicted_clv %>% 
+  distinct(cust,predicted_1yr_clv,predicted_3yr_clv) %>% 
+  pivot_longer(predicted_1yr_clv:predicted_3yr_clv) %>% 
+  ggplot(aes(value, color = name)) + 
+  geom_density() + 
+  scale_x_log10() + 
+  labs(title = "Density of 1 year predicted clv and 3 year predicted clv")
+```
+
+Is there a relationship beween the value of a customer based off the rfm model, and the predicted clv values?
+```{r}
+retail_predicted_clv %>% 
+  distinct(cust,value, predicted_1yr_clv) %>% 
+  group_by(value) %>% 
+  summarise(average_1yr_clv = mean(predicted_1yr_clv),
+            count = n()) %>% 
+  mutate(value = fct_reorder(value, average_1yr_clv)) %>% 
+  ungroup() %>% 
+  ggplot(aes(value, average_1yr_clv, size= count)) + 
+  geom_point() + 
+  labs(title = "Relationship between RFM value and predicted 1 year CLV", y = "Average 1 year CLV")
+
+retail_predicted_clv %>% 
+  distinct(cust,value, predicted_3yr_clv) %>% 
+  group_by(value) %>% 
+  summarise(average_3yr_clv = mean(predicted_3yr_clv),
+            count = n()) %>% 
+  mutate(value = fct_reorder(value, average_3yr_clv)) %>% 
+  ungroup() %>% 
+  ggplot(aes(value, average_3yr_clv, size= count)) + 
+  geom_point() + 
+  labs(title = "Relationship between RFM value and predicted 3 year CLV", y = "Average 3 year CLV")
+```
+
+
+
+Final result: Fit a BTYD model to the online retail dataset. After training and testing the model, I found that the model tended to undervalue the customers. Although the predicted CLV tended to undervalue the customers, we can infer that customers that are considered high value with the predicted CLV will most likely be true. 
+
+Managed to fit a model that predicted the CLV of the customers within the next year, and next three years.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
